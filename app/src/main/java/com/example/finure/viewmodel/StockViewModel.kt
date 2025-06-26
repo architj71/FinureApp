@@ -2,11 +2,10 @@ package com.finure.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.finure.app.data.model.StockItem
+import com.finure.app.data.model.StockGainerResponse
 import com.finure.app.data.repository.StockRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -15,20 +14,26 @@ class StockViewModel @Inject constructor(
     private val repository: StockRepository
 ) : ViewModel() {
 
-    private val _topGainers = MutableStateFlow<List<StockItem>>(emptyList())
-    val topGainers: StateFlow<List<StockItem>> = _topGainers
+    private val _gainerData = MutableStateFlow<StockGainerResponse?>(null)
+    val gainerData: StateFlow<StockGainerResponse?> = _gainerData
 
-    init {
-        fetchGainers()
-    }
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
-    private fun fetchGainers() {
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
+    fun loadTopMovers() {
         viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
             try {
-                val response = repository.fetchTopGainers()
-                _topGainers.value = response.topGainers
+                val response = repository.getTopMovers()
+                _gainerData.value = response
             } catch (e: Exception) {
-                // Handle error state
+                _error.value = e.localizedMessage ?: "Unknown error"
+            } finally {
+                _isLoading.value = false
             }
         }
     }

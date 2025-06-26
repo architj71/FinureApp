@@ -1,6 +1,7 @@
-package com.finure.app.di
+package com.finure.app.data.di
 
-import com.finure.app.data.api.AlphaVantageApi
+import com.finure.app.data.network.AlphaVantageApi
+import com.finure.app.data.repository.StockRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,13 +21,17 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(): Retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
         .client(OkHttpClient.Builder().build())
+        .addConverterFactory(GsonConverterFactory.create())
         .build()
 
     @Provides
     @Singleton
-    fun provideAlphaVantageApi(retrofit: Retrofit): AlphaVantageApi {
-        return retrofit.create(AlphaVantageApi::class.java)
-    }
+    fun provideAlphaVantageApi(retrofit: Retrofit): AlphaVantageApi =
+        retrofit.create(AlphaVantageApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideStockRepository(api: AlphaVantageApi): StockRepository =
+        StockRepository(api)
 }

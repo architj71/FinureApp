@@ -11,4 +11,3 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object Product : Screen("product", "Product", Icons.Default.Info)
     object ViewAll : Screen("view_all", "View All", Icons.Default.List)
 }
-

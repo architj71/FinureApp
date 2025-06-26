@@ -2,42 +2,38 @@ package com.finure.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.finure.app.data.model.StockItem
-import com.finure.app.model.StockItem
+import com.finure.app.data.model.StockInfo
+import com.finure.app.data.repository.WatchlistRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class WatchlistState(
-    val isLoading: Boolean = false,
-    val stocks: List<StockItem> = emptyList(),
-    val error: String? = null
-)
-
 @HiltViewModel
-class WatchlistViewModel @Inject constructor() : ViewModel() {
+class WatchlistViewModel @Inject constructor(
+    private val watchlistRepo: WatchlistRepository
+) : ViewModel() {
 
-    private val _watchlistState = MutableStateFlow(WatchlistState(isLoading = true))
-    val watchlistState: StateFlow<WatchlistState> = _watchlistState
+    private val _watchlist = MutableStateFlow<List<StockInfo>>(emptyList())
+    val watchlist: StateFlow<List<StockInfo>> = _watchlist
 
-    init {
-        loadWatchlist()
-    }
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
-    private fun loadWatchlist() {
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
+    fun loadWatchlist() {
         viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
             try {
-                // Simulated delay; replace with actual DataStore/Room fetch
-                delay(1000)
-                val dummy = listOf(
-                    StockItem("AAPL", "Apple Inc.", "192.54"),
-                    StockItem("GOOGL", "Alphabet Inc.", "2798.65")
-                )
-                _watchlistState.value = WatchlistState(stocks = dummy)
+                val data = watchlistRepo.getAllWatchlistStocks()
+                _watchlist.value = data
             } catch (e: Exception) {
-                _watchlistState.value = WatchlistState(error = e.message)
+                _error.value = e.localizedMessage
+            } finally {
+                _isLoading.value = false
             }
         }
     }

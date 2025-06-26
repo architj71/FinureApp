@@ -1,63 +1,77 @@
 package com.finure.app.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.finure.app.navigation.Screen
-import com.finure.app.viewmodel.WatchlistViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.finure.app.viewmodel.WatchlistViewModel
+import com.finure.app.data.model.StockInfo
 
 @Composable
-fun WatchlistScreen(
-    navController: NavController,
-    viewModel: WatchlistViewModel = hiltViewModel()
-) {
-    val state by viewModel.watchlistState.collectAsState()
+fun WatchlistScreen(viewModel: WatchlistViewModel = hiltViewModel()) {
+    val watchlist by viewModel.watchlist.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
 
-    when {
-        state.isLoading -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+    LaunchedEffect(Unit) {
+        viewModel.loadWatchlist()
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text("Your Watchlist", style = MaterialTheme.typography.titleLarge)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        when {
+            isLoading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             }
-        }
 
-        state.error != null -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Error: ${state.error}")
+            error != null -> {
+                Text(
+                    "Error: $error",
+                    color = MaterialTheme.colorScheme.error
+                )
             }
-        }
 
-        state.stocks.isEmpty() -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Your watchlist is empty 📭")
+            watchlist.isEmpty() -> {
+                Text(
+                    "No stocks added yet.",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
-        }
 
-        else -> {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                items(state.stocks) { stock ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        onClick = {
-                            navController.navigate("${Screen.Product.route}/${stock.symbol}")
-                        }
-                    ) {
-                        Column(Modifier.padding(16.dp)) {
-                            Text(stock.symbol, style = MaterialTheme.typography.titleMedium)
-                            Text(stock.name, style = MaterialTheme.typography.bodyMedium)
-                            Text("Price: $${stock.price}", style = MaterialTheme.typography.bodySmall)
-                        }
+            else -> {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(watchlist) { stock ->
+                        WatchlistCard(stock)
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun WatchlistCard(stock: StockInfo) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(12.dp)) {
+            Text(stock.ticker, style = MaterialTheme.typography.titleMedium)
+            Text("Price: \$${stock.price}")
+            Text("Change: ${stock.change_percentage}")
         }
     }
 }
