@@ -27,5 +27,6 @@ fun NavigationGraph(navController: NavHostController) {
             val type = it.arguments?.getString("type") ?: ""
             ViewAllScreen(navController, type)
         }
+
     }
 }

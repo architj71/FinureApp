@@ -9,15 +9,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.finure.app.ui.components.StockCard
+import com.finure.app.viewmodel.ExploreViewModel
 
 @Composable
-fun ExploreScreen(viewModel: NavHostController = hiltViewModel()) {
+fun ExploreScreen(navController: NavHostController) {
+    val viewModel: ExploreViewModel = hiltViewModel()
     val gainers by viewModel.topGainers.collectAsState()
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)) {
-
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
         Text("Top Gainers", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(8.dp))
 

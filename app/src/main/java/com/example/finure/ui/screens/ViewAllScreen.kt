@@ -24,7 +24,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.finure.viewmodel.ViewAllViewModel
 
-// File: com.finure.app.ui.screens.ViewAllScreen.kt
 @Composable
 fun ViewAllScreen(navController: NavHostController, type: String) {
     val viewModel: ViewAllViewModel = hiltViewModel()

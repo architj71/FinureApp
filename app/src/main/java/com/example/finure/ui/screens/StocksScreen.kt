@@ -23,20 +23,34 @@ fun StocksScreen(navController: NavHostController) {
         viewModel.loadTopMovers()
     }
 
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Top Gainers", style = MaterialTheme.typography.titleLarge)
-        Spacer(modifier = Modifier.height(8.dp))
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        // --- Gainers Section ---
+        SectionHeader("Top Gainers") {
+            navController.navigate("view_all/gainers")
+        }
         StockGridSection(topMovers?.top_gainers, isLoading)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Top Losers", style = MaterialTheme.typography.titleLarge)
-        Spacer(modifier = Modifier.height(8.dp))
+        // --- Losers Section ---
+        SectionHeader("Top Losers") {
+            navController.navigate("view_all/losers")
+        }
         StockGridSection(topMovers?.top_losers, isLoading)
 
         error?.let {
             Spacer(modifier = Modifier.height(16.dp))
             Text("Error: $it", color = MaterialTheme.colorScheme.error)
+        }
+    }
+}
+
+@Composable
+fun SectionHeader(title: String, onViewAllClick: () -> Unit) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(title, style = MaterialTheme.typography.titleLarge)
+        TextButton(onClick = onViewAllClick) {
+            Text("View All")
         }
     }
 }
@@ -52,7 +66,9 @@ fun StockGridSection(stocks: List<StockInfo>?, isLoading: Boolean) {
             columns = GridCells.Fixed(2),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxHeight(0.4f)
+            modifier = Modifier
+                .fillMaxHeight(0.4f)
+                .padding(vertical = 8.dp)
         ) {
             items(stocks) { stock ->
                 StockCard(stock)
