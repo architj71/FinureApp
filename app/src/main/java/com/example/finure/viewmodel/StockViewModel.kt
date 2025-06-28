@@ -28,7 +28,7 @@ class StockViewModel @Inject constructor(
             _isLoading.value = true
             _error.value = null
             try {
-                val response = repository.getTopMovers()
+                val response = repository.getTopGainersAndLosers()
                 _gainerData.value = response
             } catch (e: Exception) {
                 _error.value = e.localizedMessage ?: "Unknown error"
@@ -37,4 +37,5 @@ class StockViewModel @Inject constructor(
             }
         }
     }
+
 }

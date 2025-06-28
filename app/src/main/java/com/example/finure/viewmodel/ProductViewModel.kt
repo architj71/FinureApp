@@ -13,15 +13,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProductViewModel @Inject constructor(
-    private val repository: StockRepository,
+    private val stockRepository: StockRepository,
     private val watchlistRepository: WatchlistRepository
 ) : ViewModel() {
 
     private val _stockOverview = MutableStateFlow<CompanyOverview?>(null)
     val stockOverview: StateFlow<CompanyOverview?> = _stockOverview
-
-    private val _isInWatchlist = MutableStateFlow(false)
-    val isInWatchlist: StateFlow<Boolean> = _isInWatchlist
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -29,28 +26,32 @@ class ProductViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
-    private var currentStockInfo: StockInfo? = null
+    private val _watchlistNames = MutableStateFlow<List<String>>(emptyList())
+    val watchlistNames: StateFlow<List<String>> = _watchlistNames
+
+    private val _selectedWatchlists = MutableStateFlow<Set<String>>(emptySet())
+    val selectedWatchlists: StateFlow<Set<String>> = _selectedWatchlists
+
+    private var currentStock: StockInfo? = null
 
     fun loadOverview(symbol: String) {
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
             try {
-                val response = repository.getCompanyOverview(symbol)
+                val response = stockRepository.getCompanyOverview(symbol)
                 _stockOverview.value = response
 
-                currentStockInfo = StockInfo(
-                    ticker = response?.Symbol ?: "",
-                    price = response?.EPS ?: "0.0",
-                    change_amount = "0.0",        // not available in overview API
-                    change_percentage = "0.0",    // same here
-                    volume = "0"                  // same here
+                currentStock = StockInfo(
+                    ticker = symbol,
+                    price = response.MarketCapitalization ?: "0",
+                    change_amount = "",
+                    change_percentage = "",
+                    volume = ""
                 )
 
-                _isInWatchlist.value = currentStockInfo?.let {
-                    watchlistRepository.isInAnyWatchlist(it)
-                } ?: false
-
+                _watchlistNames.value = watchlistRepository.getAllWatchlistNames()
+                updateSelectedWatchlists()
             } catch (e: Exception) {
                 _error.value = e.localizedMessage ?: "Unknown error"
             } finally {
@@ -59,14 +60,30 @@ class ProductViewModel @Inject constructor(
         }
     }
 
-    fun toggleWatchlist(watchlistName: String) {
-        currentStockInfo?.let { stock ->
-            if (_isInWatchlist.value) {
-                watchlistRepository.removeStockFromWatchlist(watchlistName, stock)
+    fun createWatchlist(name: String) {
+        if (name.isNotBlank() && name !in _watchlistNames.value) {
+            watchlistRepository.getStocksInWatchlist(name) // initializes
+            _watchlistNames.value = watchlistRepository.getAllWatchlistNames()
+        }
+    }
+
+    fun toggleWatchlist(name: String, selected: Boolean) {
+        currentStock?.let { stock ->
+            if (selected) {
+                watchlistRepository.addStockToWatchlist(name, stock)
             } else {
-                watchlistRepository.addStockToWatchlist(watchlistName, stock)
+                watchlistRepository.removeStockFromWatchlist(name, stock)
             }
-            _isInWatchlist.value = !_isInWatchlist.value
+            updateSelectedWatchlists()
+        }
+    }
+
+    private fun updateSelectedWatchlists() {
+        currentStock?.let { stock ->
+            val selected = watchlistRepository.getAllWatchlistNames()
+                .filter { name -> stock in watchlistRepository.getStocksInWatchlist(name) }
+                .toSet()
+            _selectedWatchlists.value = selected
         }
     }
 }

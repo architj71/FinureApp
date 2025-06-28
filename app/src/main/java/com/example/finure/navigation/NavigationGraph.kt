@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.finure.ui.screens.ViewAllScreen
+import com.example.finure.ui.screens.WatchlistDetailScreen
 import com.finure.app.ui.screens.*
 
 @Composable
@@ -14,7 +15,11 @@ fun NavigationGraph(navController: NavHostController) {
             StocksScreen(navController)
         }
         composable(Screen.Watchlist.route) {
-            WatchlistScreen()
+            WatchlistListScreen(navController)
+        }
+        composable("watchlist_detail/{name}") {
+            val name = it.arguments?.getString("name") ?: ""
+            WatchlistDetailScreen(navController, name)
         }
         composable(Screen.Explore.route) {
             ExploreScreen(navController)
