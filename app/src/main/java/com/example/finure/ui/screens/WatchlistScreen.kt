@@ -1,69 +1,67 @@
 package com.finure.app.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.finure.app.viewmodel.WatchlistViewModel
+import androidx.navigation.NavHostController
 import com.finure.app.data.model.StockInfo
+import com.finure.app.viewmodel.WatchlistViewModel
 
 @Composable
-fun WatchlistScreen(viewModel: WatchlistViewModel = hiltViewModel()) {
-    val watchlist by viewModel.watchlist.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val error by viewModel.error.collectAsState()
+fun WatchlistListScreen(navController: NavHostController, viewModel: WatchlistViewModel = hiltViewModel()) {
+    val names by viewModel.watchlistNames.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.loadWatchlist()
+        viewModel.loadWatchlistNames()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text("Your Watchlist", style = MaterialTheme.typography.titleLarge)
-        Spacer(modifier = Modifier.height(8.dp))
+    Column(Modifier.fillMaxSize().padding(16.dp)) {
+        Text("Watchlist", style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.height(16.dp))
 
-        when {
-            isLoading -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            }
-
-            error != null -> {
-                Text(
-                    "Error: $error",
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-
-            watchlist.isEmpty() -> {
-                Text(
-                    "No stocks added yet.",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            else -> {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(watchlist) { stock ->
-                        WatchlistCard(stock)
+        if (names.isEmpty()) {
+            Text("No watchlists found")
+        } else {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(names) { name ->
+                    WatchlistItem(name) {
+                        navController.navigate("watchlist_detail/$name")
                     }
                 }
             }
         }
     }
 }
+
+@Composable
+fun WatchlistItem(name: String, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(name, style = MaterialTheme.typography.titleMedium)
+            Icon(Icons.Default.KeyboardArrowRight, contentDescription = null)
+        }
+    }
+}
+
 
 @Composable
 fun WatchlistCard(stock: StockInfo) {

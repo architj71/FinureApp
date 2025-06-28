@@ -35,6 +35,15 @@ class WatchlistRepository @Inject constructor() {
         return watchlists.values.flatten()
     }
 
+    fun isStockInWatchlist(watchlist: String, stock: StockInfo): Boolean {
+        return watchlists[watchlist]?.contains(stock) == true
+    }
+
+    fun getWatchlistsContainingStock(stock: StockInfo): List<String> {
+        return watchlists.filter { it.value.contains(stock) }.map { it.key }
+    }
+
+
     fun clearAll() {
         watchlists.clear()
     }
