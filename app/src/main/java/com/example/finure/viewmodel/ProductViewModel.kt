@@ -62,10 +62,12 @@ class ProductViewModel @Inject constructor(
 
     fun createWatchlist(name: String) {
         if (name.isNotBlank() && name !in _watchlistNames.value) {
-            watchlistRepository.getStocksInWatchlist(name) // initializes
+            watchlistRepository.getStocksInWatchlist(name) // Initializes list
             _watchlistNames.value = watchlistRepository.getAllWatchlistNames()
+            updateSelectedWatchlists() // ⬅ to refresh checkbox state
         }
     }
+
 
     fun toggleWatchlist(name: String, selected: Boolean) {
         currentStock?.let { stock ->
@@ -80,10 +82,14 @@ class ProductViewModel @Inject constructor(
 
     private fun updateSelectedWatchlists() {
         currentStock?.let { stock ->
-            val selected = watchlistRepository.getAllWatchlistNames()
+            val allNames = watchlistRepository.getAllWatchlistNames()
+            _watchlistNames.value = allNames
+
+            val selected = allNames
                 .filter { name -> stock in watchlistRepository.getStocksInWatchlist(name) }
                 .toSet()
             _selectedWatchlists.value = selected
         }
     }
+
 }
