@@ -1,50 +1,58 @@
 package com.finure.app.data.repository
 
 import com.finure.app.data.model.StockInfo
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class WatchlistRepository @Inject constructor() {
 
-    // Simulated in-memory storage; replace with DataStore/Room later
-    private val watchlists = mutableMapOf<String, MutableList<StockInfo>>()
+    private val _watchlists = MutableStateFlow<Map<String, MutableList<StockInfo>>>(emptyMap())
+
+    val watchlists: StateFlow<Map<String, List<StockInfo>>>
+        get() = _watchlists.map { it.mapValues { entry -> entry.value.toList() } }
+            .stateIn(
+                scope = kotlinx.coroutines.GlobalScope, // Replace with proper scope if needed
+                started = SharingStarted.Eagerly,
+                initialValue = emptyMap()
+            )
 
     fun getAllWatchlistNames(): List<String> {
-        return watchlists.keys.toList()
+        return _watchlists.value.keys.toList()
     }
 
     fun getStocksInWatchlist(name: String): List<StockInfo> {
-        return watchlists[name] ?: emptyList()
+        return _watchlists.value[name]?.toList() ?: emptyList()
     }
 
     fun addStockToWatchlist(name: String, stock: StockInfo) {
-        val list = watchlists.getOrPut(name) { mutableListOf() }
-        if (stock !in list) list.add(stock)
+        val updated = _watchlists.value.toMutableMap()
+        val list = updated.getOrPut(name) { mutableListOf() }
+        if (stock !in list) {
+            list.add(stock)
+            _watchlists.value = updated
+        }
     }
 
     fun removeStockFromWatchlist(name: String, stock: StockInfo) {
-        watchlists[name]?.remove(stock)
+        val updated = _watchlists.value.toMutableMap()
+        updated[name]?.remove(stock)
+        _watchlists.value = updated
     }
-
-    fun isInAnyWatchlist(stock: StockInfo): Boolean {
-        return watchlists.values.any { it.contains(stock) }
-    }
-
-    fun getAllWatchlistStocks(): List<StockInfo> {
-        return watchlists.values.flatten()
-    }
-
-    fun isStockInWatchlist(watchlist: String, stock: StockInfo): Boolean {
-        return watchlists[watchlist]?.contains(stock) == true
-    }
-
-    fun getWatchlistsContainingStock(stock: StockInfo): List<String> {
-        return watchlists.filter { it.value.contains(stock) }.map { it.key }
-    }
-
 
     fun clearAll() {
-        watchlists.clear()
+        _watchlists.value = emptyMap()
+    }
+
+    // Optional utility
+    fun createEmptyWatchlist(name: String) {
+        val updated = _watchlists.value.toMutableMap()
+        updated.getOrPut(name) { mutableListOf() }
+        _watchlists.value = updated
     }
 }

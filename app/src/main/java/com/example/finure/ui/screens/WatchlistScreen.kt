@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.finure.app.data.model.StockInfo
@@ -36,13 +37,15 @@ fun WatchlistListScreen(
             .fillMaxSize()
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
+
+        Spacer(modifier = Modifier.height(20.dp))
         Text(
-            "Your Watchlists",
+            "Watchlist",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.primary
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(50.dp))
 
         if (names.isEmpty()) {
             Box(
@@ -58,7 +61,7 @@ fun WatchlistListScreen(
             }
         } else {
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(names) { name ->
@@ -76,19 +79,19 @@ fun WatchlistItem(name: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 70.dp) // Increased height
             .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+                .fillMaxSize()
+                .padding(horizontal = 20.dp, vertical = 20.dp), // More internal space
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(name, style = MaterialTheme.typography.titleMedium)
+            Text(name, fontSize = 20.sp, letterSpacing = 1.2.sp )
             Icon(
                 imageVector = Icons.Default.KeyboardArrowRight,
                 contentDescription = null,
@@ -98,34 +101,7 @@ fun WatchlistItem(name: String, onClick: () -> Unit) {
     }
 }
 
-@Composable
-fun WatchlistCard(stock: StockInfo) {
-    val isPositive = stock.change_percentage.removePrefix("+").startsWith("-").not()
-    val changeColor = if (isPositive) Color(0xFF2ECC71) else Color(0xFFE74C3C)
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
-    ) {
-        Column(Modifier.padding(12.dp)) {
-            Text(
-                stock.ticker,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text("Price: \$${stock.price}", style = MaterialTheme.typography.bodyMedium)
-            Text(
-                "Change: ${stock.change_percentage}",
-                color = changeColor,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-    }
-}
 
 
 @Composable
