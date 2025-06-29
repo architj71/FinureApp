@@ -11,20 +11,20 @@ interface AlphaVantageApi {
     @GET("query")
     suspend fun getTopGainersAndLosers(
         @Query("function") function: String = "TOP_GAINERS_LOSERS",
-        @Query("apikey") apiKey: String = "JMYWZC2YTT7173IT"
+        @Query("apikey") apiKey: String = "YLG1ZHXQ507QQEU8 "
     ): StockGainerResponse
 
     @GET("query")
     suspend fun getCompanyOverview(
         @Query("function") function: String = "OVERVIEW",
         @Query("symbol") symbol: String,
-        @Query("apikey") apiKey: String = "JMYWZC2YTT7173IT"
+        @Query("apikey") apiKey: String = "YLG1ZHXQ507QQEU8 "
     ): CompanyOverview
 
     @GET("query")
     suspend fun searchTicker(
         @Query("function") function: String = "SYMBOL_SEARCH",
         @Query("keywords") keywords: String,
-        @Query("apikey") apiKey: String = "JMYWZC2YTT7173IT"
+        @Query("apikey") apiKey: String = "YLG1ZHXQ507QQEU8 "
     ): SearchResultResponse
 }

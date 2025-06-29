@@ -1,5 +1,7 @@
 package com.finure.app.data.model
 
+import com.google.gson.annotations.SerializedName
+
 data class CompanyOverview(
     val Symbol: String?,
     val Name: String?,
@@ -18,6 +20,10 @@ data class CompanyOverview(
     val Country: String?,
     val Exchange: String?,
     val OfficialSite: String?,
-    val FiftyTwoWeekHigh: String? = null,
-    val FiftyTwoWeekLow: String? = null
+
+    @SerializedName("52WeekHigh")
+    val fiftyTwoWeekHigh: String?,
+
+    @SerializedName("52WeekLow")
+    val fiftyTwoWeekLow: String?
 )

@@ -2,7 +2,7 @@ package com.finure.app.data.model
 
 import com.google.gson.annotations.SerializedName
 
-data class SearchResultResponse(
+data class SearchResultResponse (
     @SerializedName("bestMatches") val bestMatches: List<SymbolMatch>?
 )
 
