@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation("androidx.compose.material:material-icons-core:1.6.0")
     implementation("androidx.compose.material:material-icons-extended:1.6.0")
+    implementation(libs.androidx.room.common.jvm)
 
     // Navigation
     val nav_version = "2.8.0"
