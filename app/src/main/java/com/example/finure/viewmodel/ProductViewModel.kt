@@ -62,7 +62,7 @@ class ProductViewModel @Inject constructor(
 
     fun createWatchlist(name: String) {
         if (name.isNotBlank() && name !in _watchlistNames.value) {
-            watchlistRepository.getStocksInWatchlist(name) // Initializes list
+            watchlistRepository.createEmptyWatchlist(name) // Initializes list
             _watchlistNames.value = watchlistRepository.getAllWatchlistNames()
             updateSelectedWatchlists() // ⬅ to refresh checkbox state
         }

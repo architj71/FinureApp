@@ -19,6 +19,10 @@ import com.example.finure.R
 import com.finure.app.ui.components.LineChartComponent
 import com.finure.app.viewmodel.ProductViewModel
 
+import androidx.compose.material3.*
+import kotlinx.coroutines.launch
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductScreen(
     navController: NavHostController,
@@ -30,8 +34,11 @@ fun ProductScreen(
     val error by viewModel.error.collectAsState()
     val watchlistNames by viewModel.watchlistNames.collectAsState()
     val selectedWatchlists by viewModel.selectedWatchlists.collectAsState()
+    // ✅ State for dialog + bottom sheet
     var newWatchlistName by remember { mutableStateOf("") }
     var showWatchlistDialog by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     LaunchedEffect(symbol) {
         viewModel.loadOverview(symbol)
@@ -63,12 +70,16 @@ fun ProductScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("${data.Symbol} Details", style = MaterialTheme.typography.headlineSmall)
-                IconButton(onClick = { showWatchlistDialog = true }) {
+                IconButton(onClick = {
+                    showWatchlistDialog = true
+                    scope.launch { sheetState.show() }
+                }) {
                     Icon(
                         imageVector = Icons.Default.BookmarkBorder,
                         contentDescription = "Add to Watchlist"
                     )
                 }
+
             }
 
             Spacer(Modifier.height(16.dp))
@@ -144,9 +155,9 @@ fun ProductScreen(
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    MetricItem("52W Low", data.FiftyTwoWeekLow)
+                    MetricItem("52W Low", data.fiftyTwoWeekLow)
                     MetricItem("Current", data.MarketCapitalization)
-                    MetricItem("52W High", data.FiftyTwoWeekHigh)
+                    MetricItem("52W High", data.fiftyTwoWeekHigh)
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     MetricItem("Market Cap", data.MarketCapitalization)
@@ -166,54 +177,77 @@ fun ProductScreen(
 
     // ✅ Watchlist Dialog
     if (showWatchlistDialog) {
-        AlertDialog(
-            onDismissRequest = { showWatchlistDialog = false },
-            title = { Text("Manage Watchlists") },
-            text = {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        OutlinedTextField(
-                            value = newWatchlistName,
-                            onValueChange = { newWatchlistName = it },
-                            placeholder = { Text("New Watchlist") },
-                            modifier = Modifier.weight(1f)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Button(onClick = {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showWatchlistDialog = false
+                scope.launch { sheetState.hide() }
+            },
+            sheetState = sheetState,
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+            containerColor = MaterialTheme.colorScheme.background
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 10.dp)
+            ) {
+                Text(
+                    "Add to Watchlist",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = newWatchlistName,
+                        onValueChange = { newWatchlistName = it },
+                        placeholder = { Text("New Watchlist Name") },
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = {
                             if (newWatchlistName.isNotBlank()) {
                                 viewModel.createWatchlist(newWatchlistName.trim())
                                 newWatchlistName = ""
                             }
-                        }) {
-                            Text("Add")
-                        }
+                        },
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Add")
                     }
+                }
 
-                    Spacer(Modifier.height(12.dp))
-                    watchlistNames.forEach { name ->
-                        val isChecked = name in selectedWatchlists
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                        ) {
-                            Checkbox(
-                                checked = isChecked,
-                                onCheckedChange = { viewModel.toggleWatchlist(name, it) }
-                            )
-                            Text(name)
-                        }
+                Spacer(modifier = Modifier.height(16.dp))
+
+                watchlistNames.forEach { name ->
+                    val isChecked = name in selectedWatchlists
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = isChecked,
+                            onCheckedChange = { viewModel.toggleWatchlist(name, it) },
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(name, style = MaterialTheme.typography.bodyLarge)
                     }
                 }
-            },
-            confirmButton = {
-                TextButton(onClick = { showWatchlistDialog = false }) {
-                    Text("Done")
-                }
+
+                Spacer(modifier = Modifier.height(30.dp))
             }
-        )
+        }
     }
+
+
 }
 
 
