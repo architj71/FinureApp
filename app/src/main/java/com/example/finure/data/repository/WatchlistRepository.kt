@@ -1,55 +1,72 @@
-package com.finure.app.data.repository
+package com.example.finure.data.repository
 
-import com.finure.app.data.model.StockInfo
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import com.example.finure.data.model.StockInfo
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.*
+
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Repository to manage user-created watchlists stored in-memory.
+ * Exposes watchlists as reactive [StateFlow].
+ */
 @Singleton
 class WatchlistRepository @Inject constructor() {
 
+    // Internal mutable map: watchlist name -> list of stocks
     private val _watchlists = MutableStateFlow<Map<String, MutableList<StockInfo>>>(emptyMap())
 
-    val watchlists: StateFlow<Map<String, List<StockInfo>>>
-        get() = _watchlists.map { it.mapValues { entry -> entry.value.toList() } }
-            .stateIn(
-                scope = kotlinx.coroutines.GlobalScope, // Replace with proper scope if needed
-                started = SharingStarted.Eagerly,
-                initialValue = emptyMap()
-            )
+    /**
+     * Public watchlists flow, exposed as immutable snapshot.
+     * Internally converts mutable lists to immutable.
+     */
+    @OptIn(DelicateCoroutinesApi::class)
+    val watchlists: StateFlow<Map<String, List<StockInfo>>> = _watchlists
+        .map { it.mapValues { (_, v) -> v.toList() } }
+        .stateIn(
+            scope = GlobalScope, // Replace with structured scope (e.g. viewModelScope) if needed
+            started = SharingStarted.Eagerly,
+            initialValue = emptyMap()
+        )
 
-    fun getAllWatchlistNames(): List<String> {
-        return _watchlists.value.keys.toList()
-    }
+    /** Returns all watchlist names */
+    fun getAllWatchlistNames(): List<String> = _watchlists.value.keys.toList()
 
-    fun getStocksInWatchlist(name: String): List<StockInfo> {
-        return _watchlists.value[name]?.toList() ?: emptyList()
-    }
+    /** Returns all stocks in a specific watchlist */
+    fun getStocksInWatchlist(name: String): List<StockInfo> =
+        _watchlists.value[name]?.toList() ?: emptyList()
 
+    /** Adds a stock to a named watchlist */
     fun addStockToWatchlist(name: String, stock: StockInfo) {
-        val updated = _watchlists.value.toMutableMap()
-        val list = updated.getOrPut(name) { mutableListOf() }
-        if (stock !in list) {
-            list.add(stock)
-            _watchlists.value = updated
+        val current = _watchlists.value
+        val newMap = current.toMutableMap()
+        val oldList = newMap[name] ?: mutableListOf()
+
+        if (stock !in oldList) {
+            newMap[name] = oldList.toMutableList().apply { add(stock) } // ✅ create new list
+            _watchlists.value = newMap // ✅ new map triggers flow update
         }
     }
 
+    /** Removes a stock from a named watchlist */
     fun removeStockFromWatchlist(name: String, stock: StockInfo) {
-        val updated = _watchlists.value.toMutableMap()
-        updated[name]?.remove(stock)
-        _watchlists.value = updated
+        val current = _watchlists.value
+        val newMap = current.toMutableMap()
+        val oldList = newMap[name] ?: return
+
+        newMap[name] = oldList.toMutableList().apply { remove(stock) } // ✅ new list
+        _watchlists.value = newMap // ✅ new map
     }
 
+
+    /** Clears all watchlists */
     fun clearAll() {
         _watchlists.value = emptyMap()
     }
 
-    // Optional utility
+    /** Creates an empty watchlist if it doesn't exist */
     fun createEmptyWatchlist(name: String) {
         val updated = _watchlists.value.toMutableMap()
         updated.getOrPut(name) { mutableListOf() }

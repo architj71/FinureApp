@@ -1,11 +1,18 @@
-package com.finure.app.data.model
+package com.example.finure.data.model
 
 import com.google.gson.annotations.SerializedName
 
-data class SearchResultResponse (
+/**
+ * Response model for symbol search API.
+ * Contains a list of best-matching tickers based on a keyword.
+ */
+data class SearchResultResponse(
     @SerializedName("bestMatches") val bestMatches: List<SymbolMatch>?
 )
 
+/**
+ * Represents an individual search match result from the AlphaVantage symbol search.
+ */
 data class SymbolMatch(
     @SerializedName("1. symbol") val symbol: String,
     @SerializedName("2. name") val name: String,

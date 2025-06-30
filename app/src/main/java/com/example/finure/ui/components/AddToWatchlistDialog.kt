@@ -8,6 +8,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 
+/**
+ * AlertDialog used for adding a stock to a watchlist.
+ * Supports selecting an existing watchlist or creating a new one.
+ *
+ * @param existingWatchlists List of user’s existing watchlists.
+ * @param onAdd Callback when user confirms addition with selected or new name.
+ * @param onDismiss Callback when dialog is dismissed without action.
+ */
 @Composable
 fun AddToWatchlistDialog(
     existingWatchlists: List<String>,
@@ -35,19 +43,18 @@ fun AddToWatchlistDialog(
         title = { Text("Add to Watchlist") },
         text = {
             Column {
+                // Dropdown list for selecting existing watchlists
                 if (existingWatchlists.isNotEmpty()) {
                     Text("Select from existing")
                     DropdownMenu(
-                        expanded = true,
+                        expanded = true, // ⚠️ You might want to control this with a state
                         onDismissRequest = {},
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         existingWatchlists.forEach {
                             DropdownMenuItem(
                                 text = { Text(it) },
-                                onClick = {
-                                    selectedWatchlist = it
-                                }
+                                onClick = { selectedWatchlist = it }
                             )
                         }
                     }
@@ -55,6 +62,7 @@ fun AddToWatchlistDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // Input field to create a new watchlist
                 OutlinedTextField(
                     value = newWatchlist,
                     onValueChange = { newWatchlist = it },

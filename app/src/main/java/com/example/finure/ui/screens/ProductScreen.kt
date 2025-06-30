@@ -2,8 +2,11 @@ package com.finure.app.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,11 +20,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.finure.R
 import com.finure.app.ui.components.LineChartComponent
-import com.finure.app.viewmodel.ProductViewModel
-
-import androidx.compose.material3.*
+import com.example.finure.viewmodel.ProductViewModel
 import kotlinx.coroutines.launch
 
+/**
+ * Screen to display detailed stock information for a given symbol.
+ * Includes chart, metadata, and watchlist controls.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductScreen(
@@ -29,21 +34,26 @@ fun ProductScreen(
     symbol: String,
     viewModel: ProductViewModel = hiltViewModel()
 ) {
+    // State variables collected from ViewModel
     val overview by viewModel.stockOverview.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
     val watchlistNames by viewModel.watchlistNames.collectAsState()
     val selectedWatchlists by viewModel.selectedWatchlists.collectAsState()
-    // ✅ State for dialog + bottom sheet
+    val isInWatchlist by viewModel.isInWatchlist.collectAsState()
+
+    // Dialog + Bottom Sheet related UI state
     var newWatchlistName by remember { mutableStateOf("") }
     var showWatchlistDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    // Load stock details when screen opens or symbol changes
     LaunchedEffect(symbol) {
         viewModel.loadOverview(symbol)
     }
 
+    // Show loading indicator while fetching data
     if (isLoading) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -51,6 +61,7 @@ fun ProductScreen(
         return
     }
 
+    // Handle error state
     error?.let {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Error: $it", color = MaterialTheme.colorScheme.error)
@@ -58,12 +69,15 @@ fun ProductScreen(
         return
     }
 
+    // Main content if data available
     overview?.let { data ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
+            // Top bar with symbol title and bookmark toggle
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -75,15 +89,16 @@ fun ProductScreen(
                     scope.launch { sheetState.show() }
                 }) {
                     Icon(
-                        imageVector = Icons.Default.BookmarkBorder,
-                        contentDescription = "Add to Watchlist"
+                        imageVector = if (isInWatchlist) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                        contentDescription = if (isInWatchlist) "In Watchlist" else "Add to Watchlist",
+                        tint = if (isInWatchlist) MaterialTheme.colorScheme.primary else LocalContentColor.current
                     )
                 }
-
             }
 
             Spacer(Modifier.height(16.dp))
 
+            // Stock summary section with logo and basic info
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_launcher_foreground),
@@ -105,7 +120,7 @@ fun ProductScreen(
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        "+0.41%", // Placeholder
+                        "+0.41%", // Placeholder for real-time price change
                         color = Color(0xFF4CAF50),
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -114,13 +129,15 @@ fun ProductScreen(
 
             Spacer(Modifier.height(24.dp))
 
+            // Chart for historical stock price
             LineChartComponent()
             Spacer(Modifier.height(8.dp))
 
+            // Time range selection (1D, 1W, etc.)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf("1D", "1W", "1M", "3M", "6M", "1Y").forEach {
                     AssistChip(
-                        onClick = { /* TODO */ },
+                        onClick = { /* TODO: Implement range filter */ },
                         label = { Text(it) },
                         shape = RoundedCornerShape(50)
                     )
@@ -136,19 +153,35 @@ fun ProductScreen(
             )
 
             Spacer(Modifier.height(16.dp))
+
+            // Industry and Sector as colored chips
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 data.Industry?.let {
-                    AssistChip(onClick = {}, label = { Text(it) })
+                    AssistChip(
+                        onClick = { },
+                        label = { Text(it, color = MaterialTheme.colorScheme.onPrimary) },
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = Color(0xFF2196F3),
+                            labelColor = Color.White
+                        )
+                    )
                 }
                 data.Sector?.let {
-                    AssistChip(onClick = {}, label = { Text(it) })
+                    AssistChip(
+                        onClick = { },
+                        label = { Text(it, color = MaterialTheme.colorScheme.onPrimary) },
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = Color(0xFF4CAF50),
+                            labelColor = Color.White
+                        )
+                    )
                 }
             }
 
             Spacer(Modifier.height(24.dp))
-
             Divider()
 
+            // Key Stats Section
             Spacer(Modifier.height(12.dp))
             Text("Key Stats", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
@@ -173,9 +206,9 @@ fun ProductScreen(
 
             Spacer(Modifier.height(20.dp))
         }
-    } ?: Text("No stock data found.")
+    } ?: Text("No stock data found.") // Fallback if overview is null
 
-    // ✅ Watchlist Dialog
+    // Watchlist bottom sheet dialog
     if (showWatchlistDialog) {
         ModalBottomSheet(
             onDismissRequest = {
@@ -197,6 +230,7 @@ fun ProductScreen(
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
 
+                // Input for creating a new watchlist
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -224,6 +258,7 @@ fun ProductScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // List of watchlists with checkboxes
                 watchlistNames.forEach { name ->
                     val isChecked = name in selectedWatchlists
                     Row(
@@ -246,11 +281,11 @@ fun ProductScreen(
             }
         }
     }
-
-
 }
 
-
+/**
+ * A reusable UI component to display a stock metric (label + value).
+ */
 @Composable
 fun MetricItem(label: String, value: String?) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -258,4 +293,3 @@ fun MetricItem(label: String, value: String?) {
         Text(value ?: "--", fontWeight = FontWeight.SemiBold)
     }
 }
-

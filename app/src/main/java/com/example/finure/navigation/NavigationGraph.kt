@@ -1,13 +1,19 @@
 package com.finure.app.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.finure.ui.screens.ViewAllScreen
 import com.example.finure.ui.screens.WatchlistDetailScreen
 import com.finure.app.ui.screens.*
+import com.finure.app.navigation.Screen
 
+/**
+ * Defines the navigation graph for the application using Jetpack Navigation Compose.
+ * Maps route names to corresponding composable screens.
+ */
 @Composable
 fun NavigationGraph(navController: NavHostController) {
     NavHost(navController, startDestination = Screen.Stocks.route) {
@@ -17,10 +23,13 @@ fun NavigationGraph(navController: NavHostController) {
         composable(Screen.Watchlist.route) {
             WatchlistListScreen(navController)
         }
-        composable("watchlist_detail/{name}") {
-            val name = it.arguments?.getString("name") ?: ""
-            WatchlistDetailScreen(navController, name)
+        composable("watchlist_detail/{name}") { backStackEntry ->
+            val name = backStackEntry.arguments?.getString("name") ?: ""
+            key(name) {
+                WatchlistDetailScreen(navController, name)
+            }
         }
+
         composable(Screen.Explore.route) {
             ExploreScreen(navController)
         }
@@ -32,6 +41,5 @@ fun NavigationGraph(navController: NavHostController) {
             val type = it.arguments?.getString("type") ?: ""
             ViewAllScreen(navController, type)
         }
-
     }
 }

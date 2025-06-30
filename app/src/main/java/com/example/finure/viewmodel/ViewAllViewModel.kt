@@ -2,17 +2,20 @@ package com.example.finure.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.finure.app.data.model.StockInfo
-import com.finure.app.data.repository.StockRepository
+import com.example.finure.data.model.StockInfo
+import com.example.finure.data.repository.StockRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-// File: com.finure.app.viewmodel.ViewAllViewModel.kt
+/**
+ * ViewModel responsible for fetching and exposing top gainers/losers stock data.
+ * Backed by [StockRepository] and used in `ViewAllScreen`.
+ */
 @HiltViewModel
-class ViewAllViewModel @Inject constructor(
+class ViewAllViewModel @Inject constructor (
     private val stockRepository: StockRepository
 ) : ViewModel() {
 
@@ -25,6 +28,10 @@ class ViewAllViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
+    /**
+     * Loads either top gainers or top losers based on [type] ("gainers" or "losers").
+     * Handles loading state and error reporting.
+     */
     fun loadStocks(type: String) {
         viewModelScope.launch {
             _isLoading.value = true

@@ -1,7 +1,11 @@
-package com.finure.app.data.model
+package com.example.finure.data.model
 
 import com.google.gson.annotations.SerializedName
 
+/**
+ * Detailed financial and descriptive information about a company.
+ * Retrieved from the AlphaVantage "OVERVIEW" endpoint.
+ */
 data class CompanyOverview(
     val Symbol: String?,
     val Name: String?,
@@ -27,3 +31,4 @@ data class CompanyOverview(
     @SerializedName("52WeekLow")
     val fiftyTwoWeekLow: String?
 )
+

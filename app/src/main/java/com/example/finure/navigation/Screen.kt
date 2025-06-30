@@ -4,6 +4,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector
 
+/**
+ * Sealed class defining all app navigation destinations.
+ * Each screen has a route, title, and icon for bottom navigation or headers.
+ */
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object Stocks : Screen("stocks", "Stocks", Icons.Default.TrendingUp)
     object Watchlist : Screen("watchlist", "Watchlist", Icons.Default.Star)

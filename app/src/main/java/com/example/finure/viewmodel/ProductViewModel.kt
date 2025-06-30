@@ -1,16 +1,20 @@
-package com.finure.app.viewmodel
+package com.example.finure.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.finure.app.data.model.CompanyOverview
-import com.finure.app.data.model.StockInfo
-import com.finure.app.data.repository.StockRepository
-import com.finure.app.data.repository.WatchlistRepository
+import com.example.finure.data.model.CompanyOverview
+import com.example.finure.data.model.StockInfo
+import com.example.finure.data.repository.StockRepository
+import com.example.finure.data.repository.WatchlistRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel for the stock detail/product screen.
+ * Handles company overview fetching and watchlist interaction.
+ */
 @HiltViewModel
 class ProductViewModel @Inject constructor(
     private val stockRepository: StockRepository,
@@ -32,8 +36,17 @@ class ProductViewModel @Inject constructor(
     private val _selectedWatchlists = MutableStateFlow<Set<String>>(emptySet())
     val selectedWatchlists: StateFlow<Set<String>> = _selectedWatchlists
 
+    // Emits true if stock is in at least one watchlist
+    val isInWatchlist: StateFlow<Boolean> = selectedWatchlists
+        .map { it.isNotEmpty() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     private var currentStock: StockInfo? = null
 
+    /**
+     * Fetches overview for the given stock symbol.
+     * Also loads watchlist state and current membership status.
+     */
     fun loadOverview(symbol: String) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -60,15 +73,21 @@ class ProductViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Creates a new watchlist if it doesn't already exist.
+     * Updates internal state for immediate UI sync.
+     */
     fun createWatchlist(name: String) {
         if (name.isNotBlank() && name !in _watchlistNames.value) {
-            watchlistRepository.createEmptyWatchlist(name) // Initializes list
+            watchlistRepository.createEmptyWatchlist(name)
             _watchlistNames.value = watchlistRepository.getAllWatchlistNames()
-            updateSelectedWatchlists() // ⬅ to refresh checkbox state
+            updateSelectedWatchlists()
         }
     }
 
-
+    /**
+     * Toggles the membership of current stock in a given watchlist.
+     */
     fun toggleWatchlist(name: String, selected: Boolean) {
         currentStock?.let { stock ->
             if (selected) {
@@ -80,6 +99,9 @@ class ProductViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Refreshes the selected watchlist state based on current stock membership.
+     */
     private fun updateSelectedWatchlists() {
         currentStock?.let { stock ->
             val allNames = watchlistRepository.getAllWatchlistNames()
@@ -91,5 +113,4 @@ class ProductViewModel @Inject constructor(
             _selectedWatchlists.value = selected
         }
     }
-
 }
