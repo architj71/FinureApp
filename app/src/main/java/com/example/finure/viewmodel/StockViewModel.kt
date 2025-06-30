@@ -1,14 +1,18 @@
-package com.finure.app.viewmodel
+package com.example.finure.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.finure.app.data.model.StockGainerResponse
-import com.finure.app.data.repository.StockRepository
+import com.example.finure.data.model.StockGainerResponse
+import com.example.finure.data.repository.StockRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel to manage top movers (gainers/losers) data for the dashboard screen.
+ * Retrieves stock data via [StockRepository].
+ */
 @HiltViewModel
 class StockViewModel @Inject constructor(
     private val repository: StockRepository
@@ -23,6 +27,10 @@ class StockViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
+    /**
+     * Loads top gainers and losers data and updates corresponding state.
+     * Handles loading and error indicators for UI.
+     */
     fun loadTopMovers() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -37,5 +45,4 @@ class StockViewModel @Inject constructor(
             }
         }
     }
-
 }

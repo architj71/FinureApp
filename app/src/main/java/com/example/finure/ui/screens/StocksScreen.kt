@@ -1,9 +1,11 @@
 package com.finure.app.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -11,11 +13,23 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.finure.app.viewmodel.StockViewModel
-import com.finure.app.data.model.StockInfo
+import com.example.finure.R
+import com.example.finure.viewmodel.StockViewModel
+import com.example.finure.data.model.StockInfo
+
+// Temporary placeholder data for preview/demo purposes
+val dummyStocks = listOf(
+    StockInfo("AAPL", "182.91", "+4.20", "+2.35%", "10.5M"),
+    StockInfo("GOOGL", "2743.21", "+30.47", "+1.12%", "8.1M"),
+    StockInfo("TSLA", "691.76", "-6.12", "-0.87%", "14.2M"),
+    StockInfo("MSFT", "299.79", "+1.58", "+0.53%", "12.9M")
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,6 +41,7 @@ fun StocksScreen(navController: NavHostController) {
 
     var searchQuery by remember { mutableStateOf("") }
 
+    // Trigger API call once when screen is composed
     LaunchedEffect(Unit) {
         viewModel.loadTopMovers()
     }
@@ -34,11 +49,12 @@ fun StocksScreen(navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState()) // Enables screen scrolling
             .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
 
-        // 🧭 Header
+        // 🔷 App Header with Logo + Search Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -46,16 +62,32 @@ fun StocksScreen(navController: NavHostController) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Finure",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = R.drawable.finure_logo),
+                    contentDescription = "Finure Logo",
+                    modifier = Modifier
+                        .size(32.dp)
+                        .padding(end = 6.dp)
+                )
+                Text(
+                    text = "Finure",
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
 
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Search stocks...") },
+                placeholder = {
+                    Text(
+                        text = "Search stocks...",
+                        fontSize = 12.sp,
+                        modifier = Modifier.offset(y = (-2).dp) // Slight visual tweak
+                    )
+                },
                 leadingIcon = {
                     Icon(Icons.Default.Search, contentDescription = "Search Icon")
                 },
@@ -69,18 +101,21 @@ fun StocksScreen(navController: NavHostController) {
                 modifier = Modifier
                     .height(48.dp)
                     .width(220.dp)
+                    .padding(end = 50.dp)
             )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // 🔼 Top Gainers Section
-        SectionHeader("📈 Top Gainers") {
+        // Top Gainers Section
+        SectionHeader("🔼 Top Gainers") {
             navController.navigate("view_all/gainers")
         }
 
         StockGridSection(
-            stocks = topMovers?.top_gainers,
+            // Uncomment below to use dummy API data instead of dummy
+            // stocks = dummyStocks,
+            stocks = topMovers?.top_gainers?.take(4),
             isLoading = isLoading,
             onStockClick = { symbol -> navController.navigate("product/$symbol") },
             isGainer = true
@@ -88,18 +123,23 @@ fun StocksScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // 🔽 Top Losers Section
-        SectionHeader("📉 Top Losers") {
+        // Top Losers Section
+        SectionHeader("🔽 Top Losers") {
             navController.navigate("view_all/losers")
         }
 
         StockGridSection(
-            stocks = topMovers?.top_losers,
+            // Uncomment below to use dummy API data instead of dummy
+            // stocks = dummyStocks,
+            stocks = topMovers?.top_losers?.take(4),
             isLoading = isLoading,
             onStockClick = { symbol -> navController.navigate("product/$symbol") },
             isGainer = false
         )
 
+        Spacer(modifier = Modifier.height(80.dp))
+
+        // Display error message if data fetch fails
         error?.let {
             Spacer(modifier = Modifier.height(16.dp))
             Text("Error: $it", color = MaterialTheme.colorScheme.error)
@@ -107,6 +147,9 @@ fun StocksScreen(navController: NavHostController) {
     }
 }
 
+/**
+ * Section header with a title and "View All" button
+ */
 @Composable
 fun SectionHeader(title: String, onViewAllClick: () -> Unit) {
     Row(
@@ -116,13 +159,20 @@ fun SectionHeader(title: String, onViewAllClick: () -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(title, style = MaterialTheme.typography.titleLarge)
+        Text(
+            text = title,
+            fontSize = 20.sp,
+            color = MaterialTheme.colorScheme.onBackground
+        )
         TextButton(onClick = onViewAllClick) {
             Text("View All")
         }
     }
 }
 
+/**
+ * Displays a manual 2-column stock card grid for a section (gainers/losers).
+ */
 @Composable
 fun StockGridSection(
     stocks: List<StockInfo>?,
@@ -130,40 +180,61 @@ fun StockGridSection(
     onStockClick: (String) -> Unit,
     isGainer: Boolean
 ) {
-    if (isLoading) {
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+    when {
+        isLoading -> {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
         }
-    } else if (stocks.isNullOrEmpty()) {
-        Text("No data available.", color = MaterialTheme.colorScheme.onBackground)
-    } else {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier
-                .fillMaxHeight(0.45f)
-                .padding(vertical = 8.dp)
-        ) {
-            items(stocks) { stock ->
-                StockCard(
-                    stock = stock,
-                    onClick = { onStockClick(stock.ticker) },
-                    isGainer = isGainer
-                )
+
+        stocks.isNullOrEmpty() -> {
+            Text("No data available.", color = MaterialTheme.colorScheme.onBackground)
+        }
+
+        else -> {
+            // Render grid using nested Rows (manual grid for layout control)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                stocks.chunked(2).forEach { rowStocks ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        rowStocks.forEach { stock ->
+                            Box(modifier = Modifier.weight(1f)) {
+                                StockCard(
+                                    stock = stock,
+                                    onClick = { onStockClick(stock.ticker) },
+                                    isGainer = isGainer
+                                )
+                            }
+                        }
+
+                        // Fill blank space if row has only 1 item
+                        if (rowStocks.size == 1) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                }
             }
         }
     }
 }
 
+/**
+ * Individual stock card with ticker, price and change percent.
+ * Changes text color based on gainer/loser.
+ */
 @Composable
 fun StockCard(stock: StockInfo, onClick: () -> Unit, isGainer: Boolean) {
-    val color = if (isGainer) Color(0xFF2ECC71) else Color(0xFFE74C3C)
+    val color = if (isGainer) Color(0xFF2ECC71) else Color(0xFFE74C3C) // Green vs Red
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp)
+            .height(150.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -175,19 +246,22 @@ fun StockCard(stock: StockInfo, onClick: () -> Unit, isGainer: Boolean) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(12.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.SpaceAround
         ) {
             Text(
                 text = stock.ticker,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "\$${stock.price}",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.W500
             )
             Text(
-                text = "Price: \$${stock.price}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = "Change: ${stock.change_percentage}",
+                text = stock.change_percentage,
                 style = MaterialTheme.typography.bodyMedium,
                 color = color
             )
