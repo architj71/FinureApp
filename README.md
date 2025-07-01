@@ -33,8 +33,6 @@
 
 ## 📸 Screenshots
 
-## 📸 Screenshots
-
 <table>
   <tr>
     <td style="padding: 10px;">
@@ -68,7 +66,6 @@
   </tr>
 </table>
 
-
 ---
 
 ## 🏗️ Tech Stack
@@ -100,7 +97,7 @@ This app uses the [Alpha Vantage API](https://www.alphavantage.co/documentation/
 ## 📦 APK & Release
 
 - ✅ [Download latest APK (Google Drive)](https://drive.google.com/file/d/1sImhdyLjPuGNm-YgqSbeFHF7VxpFOMIY/view?usp=sharing)
-- 📺 [View demo video (Screen Recording)](https://drive.google.com/file/d/1_3ONs7Ll7oAk4RuBPyyfUbbvI5gozGcQ/view?usp=sharing)
+- 📺 [View demo video (Screen Recording)](https://drive.google.com/file/d/1jl6dmets6V-QlWIpsiQ_eWI87xKgVqOX/view?usp=sharing)
 
 ---
 
