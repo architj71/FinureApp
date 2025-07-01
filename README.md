@@ -35,31 +35,31 @@
 
 <table>
   <tr>
-    <td style="padding: 10px;">
+    <td style="padding: 40px;">
       <img src="screenshots/explore.png" width="300" alt=""/>
       <p align="center"><b>Explore Screen</b></p>
     </td>
-    <td style="padding: 10px;">
+    <td style="padding: 40px;">
       <img src="screenshots/view_all.png" width="300"/>
       <p align="center"><b>View All Screen</b></p>
     </td>
   </tr>
   <tr>
-    <td style="padding: 10px;">
-      <img src="screenshots/watchlist.png" width="300"/>
+    <td style="padding: 40px;">
+      <img src="screenshots/watchlists.png" width="300"/>
       <p align="center"><b>Watchlist Screen<br/>(All Watchlists)</b></p>
     </td>
-    <td style="padding: 10px;">
+    <td style="padding: 40px;">
       <img src="screenshots/watchlist.png" width="300"/>
       <p align="center"><b>Watchlists Screen<br/>(Stocks in a Watchlist)</b></p>
     </td>
   </tr>
   <tr>
-    <td style="padding: 10px;">
+    <td style="padding: 40px;">
       <img src="screenshots/product.png" width="300"/>
       <p align="center"><b>Product Screen</b></p>
     </td>
-    <td style="padding: 10px;">
+    <td style="padding: 40px;">
       <img src="screenshots/add_to_watchlist_popup.png" width="300"/>
       <p align="center"><b>Add to Watchlist Popup</b></p>
     </td>
