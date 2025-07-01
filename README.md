@@ -46,7 +46,7 @@
   </tr>
   <tr>
     <td style="padding: 40px;">
-      <img src="screenshots/watchlists.png" width="300"/>
+      <img src="screenshots/watchlist_screen.png" width="300"/>
       <p align="center"><b>Watchlist Screen<br/>(All Watchlists)</b></p>
     </td>
     <td style="padding: 40px;">
