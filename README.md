@@ -33,32 +33,41 @@
 
 ## 📸 Screenshots
 
+## 📸 Screenshots
+
 <table>
   <tr>
-    <td><img src="screenshots/explore.png" alt="Explore Screen" width="300"/></td>
-    <td><img src="screenshots/view_all.png" alt="View All Screen" width="300"/></td>
+    <td style="padding: 10px;">
+      <img src="screenshots/explore.png" width="300"/>
+      <p align="center"><b>Explore Screen</b></p>
+    </td>
+    <td style="padding: 10px;">
+      <img src="screenshots/view_all.png" width="300"/>
+      <p align="center"><b>View All Screen</b></p>
+    </td>
   </tr>
   <tr>
-    <td align="center">Explore Screen</td>
-    <td align="center">View All Screen</td>
+    <td style="padding: 10px;">
+      <img src="screenshots/watchlist.png" width="300"/>
+      <p align="center"><b>Watchlist Screen<br/>(All Watchlists)</b></p>
+    </td>
+    <td style="padding: 10px;">
+      <img src="screenshots/watchlist.png" width="300"/>
+      <p align="center"><b>Watchlists Screen<br/>(Stocks in a Watchlist)</b></p>
+    </td>
   </tr>
   <tr>
-    <td><img src="screenshots/watchlist.png" alt="Watchlist Screen" width="300"/></td>
-    <td><img src="screenshots/watchlists.png" alt="Stocks in Watchlist" width="300"/></td>
-  </tr>
-  <tr>
-    <td align="center">Watchlist Screen (All Lists)</td>
-    <td align="center">Watchlists Screen (Stocks in a List)</td>
-  </tr>
-  <tr>
-    <td><img src="screenshots/product.png" alt="Product Screen" width="300"/></td>
-    <td><img src="screenshots/add_to_watchlist_popup.png" alt="Add to Watchlist Popup" width="300"/></td>
-  </tr>
-  <tr>
-    <td align="center">Product Screen</td>
-    <td align="center">Add to Watchlist Popup</td>
+    <td style="padding: 10px;">
+      <img src="screenshots/product.png" width="300"/>
+      <p align="center"><b>Product Screen</b></p>
+    </td>
+    <td style="padding: 10px;">
+      <img src="screenshots/add_to_watchlist_popup.png" width="300"/>
+      <p align="center"><b>Add to Watchlist Popup</b></p>
+    </td>
   </tr>
 </table>
+
 
 ---
 
