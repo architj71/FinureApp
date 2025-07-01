@@ -31,6 +31,37 @@
 
 ---
 
+## 📸 Screenshots
+
+<table>
+  <tr>
+    <td><img src="screenshots/explore.png" alt="Explore Screen" width="300"/></td>
+    <td><img src="screenshots/view_all.png" alt="View All Screen" width="300"/></td>
+  </tr>
+  <tr>
+    <td align="center">Explore Screen</td>
+    <td align="center">View All Screen</td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/watchlist.png" alt="Watchlist Screen" width="300"/></td>
+    <td><img src="screenshots/watchlists.png" alt="Stocks in Watchlist" width="300"/></td>
+  </tr>
+  <tr>
+    <td align="center">Watchlist Screen (All Lists)</td>
+    <td align="center">Watchlists Screen (Stocks in a List)</td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/product.png" alt="Product Screen" width="300"/></td>
+    <td><img src="screenshots/add_to_watchlist_popup.png" alt="Add to Watchlist Popup" width="300"/></td>
+  </tr>
+  <tr>
+    <td align="center">Product Screen</td>
+    <td align="center">Add to Watchlist Popup</td>
+  </tr>
+</table>
+
+---
+
 ## 🏗️ Tech Stack
 
 - **Language:** Kotlin
