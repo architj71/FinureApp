@@ -38,7 +38,7 @@
 <table>
   <tr>
     <td style="padding: 10px;">
-      <img src="screenshots/explore.png" width="300"/>
+      <img src="screenshots/explore.png" width="300" alt=""/>
       <p align="center"><b>Explore Screen</b></p>
     </td>
     <td style="padding: 10px;">
